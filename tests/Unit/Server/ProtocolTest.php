@@ -325,6 +325,7 @@ final class ProtocolTest extends TestCase
                     $decoded = json_decode($data, true);
 
                     return isset($decoded['error'])
+                        && 1 === ($decoded['id'] ?? null)
                         && str_contains($decoded['error']['message'], 'Session not found or has expired');
                 }),
                 $this->callback(static function ($context) {
