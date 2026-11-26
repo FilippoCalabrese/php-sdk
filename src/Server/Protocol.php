@@ -1212,9 +1212,12 @@ class Protocol
     private function resolveSession(TransportInterface $transport, ?Uuid $sessionId, MessageInterface|InvalidInputMessageException $message, ?string $principal): ?SessionInterface
     {
         if ($message instanceof InitializeRequest) {
-            // Spec: An initialize request must not have a session ID.
             if ($sessionId) {
-                $error = Error::forInvalidRequest('A session ID MUST NOT be sent with an "initialize" request.');
+                // Only Streamable HTTP takes the session id from the client; other transports keep the one of their handshake.
+                $reason = $transport instanceof StreamableHttpTransport
+                    ? 'A session ID MUST NOT be sent with an "initialize" request.'
+                    : 'An "initialize" request is only accepted once per connection.';
+                $error = Error::forInvalidRequest($reason, self::findRequestId($message));
                 $this->sendResponse($transport, $error, null, ['status_code' => 400]);
 
                 return null;
