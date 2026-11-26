@@ -8,6 +8,8 @@ All notable changes to `mcp/sdk` will be documented in this file.
 ### Server
 
 * Fix const validation errors always reporting the expected value as null.
+* Fix the refusal of an `initialize` on an initialized session missing the request id, and name a repeated handshake as such outside of Streamable HTTP.
+* Fix the refusal of a request for an unknown or expired session missing the request id.
 
 0.10.0
 ------

@@ -845,6 +845,23 @@ final class StreamableHttpTransportTest extends TestCase
         }
     }
 
+    #[TestDox('an initialize carrying a session id is refused with the id of the request')]
+    public function testInitializeWithSessionIdIsRefusedWithItsId(): void
+    {
+        $server = Server::builder()->setServerInfo('test', '1.0')->setSession(new InMemorySessionStore())->build();
+        $request = $this->initializeRequest(ProtocolVersion::V2025_06_18->value, ProtocolVersion::V2025_06_18->value)
+            ->withHeader(StreamableHttpTransport::SESSION_HEADER, $this->initialize($server));
+
+        $response = $server->run(new StreamableHttpTransport($request, $this->factory, $this->factory));
+
+        $this->assertSame(400, $response->getStatusCode());
+        $this->assertSame([
+            'jsonrpc' => '2.0',
+            'id' => 1,
+            'error' => ['code' => Error::INVALID_REQUEST, 'message' => 'A session ID MUST NOT be sent with an "initialize" request.'],
+        ], json_decode((string) $response->getBody(), true));
+    }
+
     /**
      * Sends one POST to a fresh server sharing $store, like a PHP worker would.
      */

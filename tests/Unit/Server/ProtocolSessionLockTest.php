@@ -199,6 +199,7 @@ final class ProtocolSessionLockTest extends TestCase
         $transport = new RecordingTransport();
         $protocol->processInput($transport, $input, $sessionId, null, 'carol');
 
+        $this->assertSame(1, json_decode($unknown->sent[0]['message'], true)['id'] ?? null);
         $this->assertSame($unknown->sent, $transport->sent);
     }
 

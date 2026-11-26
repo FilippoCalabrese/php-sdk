@@ -259,6 +259,24 @@ final class StdioDualEraTest extends TestCase
         $this->assertSame(Error::INVALID_REQUEST, $answers[2]['error']['code']);
     }
 
+    #[TestDox('a repeated handshake is refused with the id of the request')]
+    public function testRepeatedHandshakeIsRefusedWithItsId(): void
+    {
+        $lines = $this->exchange(self::builder(), [
+            self::initialize(1),
+            ['jsonrpc' => '2.0', 'method' => 'notifications/initialized'],
+            self::initialize(7),
+        ]);
+
+        $this->assertCount(2, $lines);
+        $this->assertSame(ProtocolVersion::V2025_11_25->value, $lines[0]['result']['protocolVersion']);
+        $this->assertSame([
+            'jsonrpc' => '2.0',
+            'id' => 7,
+            'error' => ['code' => Error::INVALID_REQUEST, 'message' => 'An "initialize" request is only accepted once per connection.'],
+        ], $lines[1]);
+    }
+
     #[TestDox('a handshake-only server refuses a modern probe and still accepts the handshake')]
     public function testHandshakeOnlyServerRefusesTheProbe(): void
     {

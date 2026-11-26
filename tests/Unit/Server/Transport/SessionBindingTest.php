@@ -90,6 +90,7 @@ final class SessionBindingTest extends TestCase
 
         $this->assertSame(404, $unknown->getStatusCode());
         $this->assertSame(404, $response->getStatusCode());
+        $this->assertSame(2, json_decode((string) $unknown->getBody(), true)['id'] ?? null);
         $this->assertSame((string) $unknown->getBody(), (string) $response->getBody());
     }
 

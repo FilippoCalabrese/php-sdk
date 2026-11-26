@@ -249,7 +249,7 @@ final class ProtocolTest extends TestCase
         $this->assertArrayHasKey('result', $message);
     }
 
-    #[TestDox('Initialize request must not have a session ID')]
+    #[TestDox('Initialize request on an initialized connection is refused with its id')]
     public function testInitializeRequestWithSessionIdReturnsError(): void
     {
         $this->transport->expects($this->once())
@@ -259,7 +259,8 @@ final class ProtocolTest extends TestCase
                     $decoded = json_decode($data, true);
 
                     return isset($decoded['error'])
-                        && str_contains($decoded['error']['message'], 'session ID MUST NOT be sent');
+                        && 1 === ($decoded['id'] ?? null)
+                        && 'An "initialize" request is only accepted once per connection.' === $decoded['error']['message'];
                 }),
                 $this->anything()
             );
@@ -324,6 +325,7 @@ final class ProtocolTest extends TestCase
                     $decoded = json_decode($data, true);
 
                     return isset($decoded['error'])
+                        && 1 === ($decoded['id'] ?? null)
                         && str_contains($decoded['error']['message'], 'Session not found or has expired');
                 }),
                 $this->callback(static function ($context) {
